@@ -7,51 +7,50 @@ using System.Linq;
 namespace VisualIntelligentScissors {
   public class SimpleScissors : Scissors {
 
-  public SimpleScissors() { }
+    public SimpleScissors() { }
 
-  private List<Point> settled = new List<Point>();
+    private List<Point> settled = new List<Point>();
 
-  /// <summary>
-  /// constructor for SimpleScissors. 
-  /// </summary>
-  /// <param name="image">the image you are going to segment including methods for getting gradients.</param>
-  /// <param name="overlay">a bitmap on which you can draw stuff.</param>
-  public SimpleScissors(GrayBitmap image, Bitmap overlay) : base(image, overlay) { }
+    /// <summary>
+    /// constructor for SimpleScissors. 
+    /// </summary>
+    /// <param name="image">the image you are going to segment including methods for getting gradients.</param>
+    /// <param name="overlay">a bitmap on which you can draw stuff.</param>
+    public SimpleScissors(GrayBitmap image, Bitmap overlay) : base(image, overlay) { }
 
-  // this is a class you need to implement in CS 312. 
+    // this is a class you need to implement in CS 312. 
 
-  /// <summary>
-  ///  this is the class to implement for CS 312. 
-  /// </summary>
-  /// <param name="points">the list of segmentation points parsed from the pgm file</param>
-  /// <param name="pen">a pen for writing on the overlay if you want to use it.</param>
-  public override void FindSegmentation(IList<Point> points, Pen pen)
-  {
-    // this is the entry point for this class when the button is clicked for 
-    // segmenting the image using the simple greedy algorithm. 
-    // the points
-    if (Image == null) throw new InvalidOperationException("Set Image property first.");
-    if (points.Count == 1) return;
+    /// <summary>
+    ///  this is the class to implement for CS 312. 
+    /// </summary>
+    /// <param name="points">the list of segmentation points parsed from the pgm file</param>
+    /// <param name="pen">a pen for writing on the overlay if you want to use it.</param>
+    public override void FindSegmentation(IList<Point> points, Pen pen) {
+      // this is the entry point for this class when the button is clicked for 
+      // segmenting the image using the simple greedy algorithm. 
+      // the points
+      if (Image == null) throw new InvalidOperationException("Set Image property first.");
+      if (points.Count == 1) return;
 
-    Graphics g = Graphics.FromImage(Overlay); 
+      Graphics g = Graphics.FromImage(Overlay); 
 
-    Point nextPoint;
-    Point currenctPoint = points[0];
-    settled.Add(currenctPoint);
+      Point nextPoint;
+      Point currenctPoint = points[0];
+      settled.Add(currenctPoint);
 
-    for (int i = 1; i < points.Count; i++) {
-      nextPoint = points[i];
-      while (currenctPoint != nextPoint && !IsEdgePoint(currenctPoint)) {
-        g.FillRectangle(pen.Brush, currenctPoint.X, currenctPoint.Y, 1, 1);
-        currenctPoint = GetSmallestNeighborPoint(currenctPoint);
-        settled.Add(currenctPoint);
+      for (int i = 1; i < points.Count; i++) {
+        nextPoint = points[i];
+        while (currenctPoint != nextPoint && !IsEdgePoint(currenctPoint)) {
+          g.FillRectangle(pen.Brush, currenctPoint.X, currenctPoint.Y, 1, 1);
+          currenctPoint = GetSmallestNeighborPoint(currenctPoint);
+          settled.Add(currenctPoint);
+        }
+        currenctPoint = nextPoint;
       }
-      currenctPoint = nextPoint;
-    }
 
-    // Clear
-    settled = new List<Point>();
-  }
+      // Clear
+      settled = new List<Point>();
+    }
 
     private Point GetSmallestNeighborPoint(Point p) {
       List<Point> neighbors = new List<Point>();

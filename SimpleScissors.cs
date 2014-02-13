@@ -8,7 +8,7 @@ namespace VisualIntelligentScissors
 {
 	public class SimpleScissors : Scissors
 	{
-		public SimpleScissors() { }
+  public SimpleScissors() { }
 
     private List<Point> settled = new List<Point>();
 
@@ -17,7 +17,7 @@ namespace VisualIntelligentScissors
         /// </summary>
         /// <param name="image">the image you are going to segment including methods for getting gradients.</param>
         /// <param name="overlay">a bitmap on which you can draw stuff.</param>
-		public SimpleScissors(GrayBitmap image, Bitmap overlay) : base(image, overlay) { }
+  public SimpleScissors(GrayBitmap image, Bitmap overlay) : base(image, overlay) { }
 
         // this is a class you need to implement in CS 312. 
 
@@ -26,8 +26,8 @@ namespace VisualIntelligentScissors
         /// </summary>
         /// <param name="points">the list of segmentation points parsed from the pgm file</param>
         /// <param name="pen">a pen for writing on the overlay if you want to use it.</param>
-		public override void FindSegmentation(IList<Point> points, Pen pen)
-		{
+  public override void FindSegmentation(IList<Point> points, Pen pen)
+  {
       // this is the entry point for this class when the button is clicked for 
       // segmenting the image using the simple greedy algorithm. 
       // the points
@@ -52,7 +52,7 @@ namespace VisualIntelligentScissors
 
       // Clear
       settled = new List<Point>();
-		}
+  }
 
     private Point GetSmallestNeighborPoint(Point p) {
       List<Point> neighbors = new List<Point>();

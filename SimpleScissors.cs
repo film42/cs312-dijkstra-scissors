@@ -55,9 +55,9 @@ namespace VisualIntelligentScissors {
     private Point GetSmallestNeighborPoint(Point p) {
       List<Point> neighbors = new List<Point>();
 
-      // Oriented points: N, E, S, W
-      neighbors.Add( new Point(p.X, p.Y + 1) );
+      // Oriented points: N, S, E, W
       neighbors.Add( new Point(p.X, p.Y - 1) );
+      neighbors.Add( new Point(p.X, p.Y + 1) );
       neighbors.Add( new Point(p.X + 1, p.Y) );
       neighbors.Add( new Point(p.X - 1, p.Y) );
 

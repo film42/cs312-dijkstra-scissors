@@ -40,7 +40,8 @@ namespace VisualIntelligentScissors {
         nextPoint = points[i];
         // Create some vars
         PrioQueue q = new PrioQueue();
-        List<Node> results = new List<Node>();
+        //List<Node> results = new List<Node>();
+        var results = new Dictionary<int, Dictionary<int, Node>>();
         int currentWeight = GetPixelWeight(currenctPoint);
         bool foundGoal = false;
         // Enqueue to make it past the first loop; weight of 0
@@ -49,8 +50,8 @@ namespace VisualIntelligentScissors {
         while (!q.IsEmpty() && !foundGoal) {
           // Pop the lowest cost node
           Node v = (Node)q.Dequeue();
-          // Mark `v` as visited 
-          results.Add(v);
+          // Mark `v` as visited
+          AddNodeToResults(ref results, v);
           // Iterate over each child
           foreach (Point p in GetNeighbors(v.Current)) {
             // If destination point, stop.
@@ -84,11 +85,20 @@ namespace VisualIntelligentScissors {
       }
     }
 
-    public bool InResults(ref List<Node> results, Point pt) {
-      foreach (Node n in results) {
-        if (n.Current.X == pt.X && n.Current.Y == pt.Y)
+    public void AddNodeToResults(ref Dictionary<int, Dictionary<int, Node>> results, Node node) { 
+      Point pt = node.Current;
+      if (!results.ContainsKey(pt.Y))
+        results.Add(pt.Y, new Dictionary<int,Node>());
+
+      results[pt.Y][pt.X] = node;
+    }
+
+    public bool InResults(ref Dictionary<int, Dictionary<int, Node>> results, Point pt) {
+      if (results.ContainsKey(pt.Y))
+        if (results[pt.Y].ContainsKey(pt.X))
           return true;
-      }
+
+      // Not found
       return false;
     }
 
@@ -168,10 +178,9 @@ namespace VisualIntelligentScissors {
       // Iterate through all the queues in storage
       foreach (Queue q in storage.Values) {
         // Iterate through all Nodes in each sub queue
-        foreach (object o in q) {
-          Node c = (Node)o;
+        foreach (Node c in q) {
           // Return true if the points match
-          if (p.X == c.Current.X && p.X == c.Current.Y)
+          if ((p.X == c.Current.X) && (p.Y == c.Current.Y))
             return true;
         }
       }

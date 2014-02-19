@@ -30,22 +30,35 @@ namespace VisualIntelligentScissors {
       // segmenting the image using the simple greedy algorithm. 
       // the points
       if (Image == null) throw new InvalidOperationException("Set Image property first.");
-      if (points.Count == 1) return;
+      if (points.Count <= 1) return;
 
+      // Ensure the points cycle
+      points.Add(points[0]);
+
+      // Create our graphics object
       Graphics g = Graphics.FromImage(Overlay); 
 
+      // Declare next point and set first point to settled set
       Point nextPoint;
-      Point currenctPoint = points[0];
-      settled.Add(currenctPoint);
+      Point currentPoint = points[0];
+      settled.Add(currentPoint);
 
+      // Start from point 2 and iterate until the end
       for (int i = 1; i < points.Count; i++) {
+        // Set next point for reference
         nextPoint = points[i];
-        while (currenctPoint != nextPoint && !IsEdgePoint(currenctPoint)) {
-          g.FillRectangle(pen.Brush, currenctPoint.X, currenctPoint.Y, 1, 1);
-          currenctPoint = GetSmallestNeighborPoint(currenctPoint);
-          settled.Add(currenctPoint);
+
+        // While we haven't found the next point and haven't hit a border
+        while (currentPoint != nextPoint && !IsEdgePoint(currentPoint)) {
+          // Draw the point
+          g.FillRectangle(pen.Brush, currentPoint.X, currentPoint.Y, 1, 1);
+          // Set current point to be the smallest neighbor
+          currentPoint = GetSmallestNeighborPoint(currentPoint);
+          // Settle the new point
+          settled.Add(currentPoint);
         }
-        currenctPoint = nextPoint;
+        // Iterate to the next point
+        currentPoint = nextPoint;
       }
 
       // Clear
@@ -64,25 +77,29 @@ namespace VisualIntelligentScissors {
       // See which one is smallest
       Point smallestNeighbor = new Point(-1, -1);
       int smallestValue = int.MaxValue;
+      // Iterate through neighbors
       foreach (Point n in neighbors) { 
         int value = GetPixelWeight(n);
+        // Get the smallest point here
         if (!IsEdgePoint(n) && !IsPointSettled(n) && value < smallestValue) {
           smallestValue = value;
           smallestNeighbor = n;
         }
       }
 
-      // Return
+      // Return smallest particular neighbor
       return smallestNeighbor;
     }
 
     private bool IsPointSettled(Point p) {
+      // Search settled list for a point
       var set = settled.Where(q => q.X == p.X && q.Y == p.Y);
       return set.Any();
     }
 
     private bool IsEdgePoint(Point p) {
-      return (p.X <= 1 || p.Y <= 1 || p.Y >= Image.Bitmap.Width - 1 || p.Y >= Image.Bitmap.Height - 1) ;
+      // Check if a point is beyond the bounds
+      return (p.X <= 1 || p.Y <= 1 || p.Y >= Image.Bitmap.Width - 1 || p.Y >= Image.Bitmap.Height - 1);
     }
   }
 }

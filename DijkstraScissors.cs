@@ -34,11 +34,13 @@ namespace VisualIntelligentScissors {
       // Ensure the points connect through
       points.Add(points[0]);
 
+      // Setup graphics
       Graphics g = Graphics.FromImage(Overlay);
-      Node shortestPath = null;
 
+      // Declare vars and set current to first point
+      Node shortestPath = null;
       Point nextPoint;
-      Point currenctPoint = points[0];
+      Point currentPoint = points[0];
 
       for (int i = 1; i < points.Count; i++) {
         nextPoint = points[i];
@@ -46,10 +48,10 @@ namespace VisualIntelligentScissors {
         PrioQueue q = new PrioQueue();
         //PriorityQueue<Node> q = new PriorityQueue<Node>();
         var results = new Dictionary<int, Dictionary<int, Node>>();
-        int currentWeight = GetPixelWeight(currenctPoint);
+        int currentWeight = GetPixelWeight(currentPoint);
         bool foundGoal = false;
         // Enqueue to make it past the first loop; weight of 0
-        Node start = new Node(null, currenctPoint, currentWeight);
+        Node start = new Node(null, currentPoint, currentWeight);
         q.Enqueue(start, 0);
         // Settle the start point
         AddNodeToResults(ref results, start);
@@ -90,24 +92,27 @@ namespace VisualIntelligentScissors {
         }
 
         // Iterate to the next Point
-        currenctPoint = nextPoint;
+        currentPoint = nextPoint;
       }
     }
 
     public void AddNodeToResults(ref Dictionary<int, Dictionary<int, Node>> results, Node node) { 
       Point pt = node.Current;
+      // If the Y key doesn't exist, make a new Dictionary and settle it
       if (!results.ContainsKey(pt.Y))
         results.Add(pt.Y, new Dictionary<int,Node>());
 
+      // Otherwise just settle it
       results[pt.Y][pt.X] = node;
     }
 
     public bool InResults(ref Dictionary<int, Dictionary<int, Node>> results, Point pt) {
+      // If the key exists for both, it's found
       if (results.ContainsKey(pt.Y))
         if (results[pt.Y].ContainsKey(pt.X))
           return true;
 
-      // Not found
+      // Otherwise, not found
       return false;
     }
 
@@ -135,6 +140,8 @@ namespace VisualIntelligentScissors {
     }
   }
 
+  // Node class to be used in Priority Queue
+  // Also used to chain our paths for easier drawing
   public class Node {
 
     public Node Parent;
@@ -180,11 +187,6 @@ namespace VisualIntelligentScissors {
       }
     }
 
-    public object Dequeue(int prio) {
-      total_size--;
-      return storage[prio].Dequeue();
-    }
-
     public void Enqueue(object item, int prio) {
       if (!storage.ContainsKey(prio)) {
         storage.Add(prio, new Queue());
@@ -192,20 +194,6 @@ namespace VisualIntelligentScissors {
       storage[prio].Enqueue(item);
       total_size++;
 
-    }
-
-    public bool Contains(Point p) {
-      // Iterate through all the queues in storage
-      foreach (Queue q in storage.Values) {
-        // Iterate through all Nodes in each sub queue
-        foreach (Node c in q) {
-          // Return true if the points match
-          if ((p.X == c.Current.X) && (p.Y == c.Current.Y))
-            return true;
-        }
-      }
-      // Nothing found, return false
-      return false;
     }
   }
 }

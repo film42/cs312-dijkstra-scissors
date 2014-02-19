@@ -2,7 +2,8 @@ using System;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Collections; 
+using System.Collections;
+using System.Linq; 
 
 namespace VisualIntelligentScissors {
   public class DijkstraScissors : Scissors {
@@ -30,6 +31,9 @@ namespace VisualIntelligentScissors {
       if (Image == null) throw new InvalidOperationException("Set Image property first.");
       if (points.Count == 1) return;
 
+      // Ensure the points connect through
+      points.Add(points[0]);
+
       Graphics g = Graphics.FromImage(Overlay);
       Node shortestPath = null;
 
@@ -40,18 +44,19 @@ namespace VisualIntelligentScissors {
         nextPoint = points[i];
         // Create some vars
         PrioQueue q = new PrioQueue();
-        //List<Node> results = new List<Node>();
+        //PriorityQueue<Node> q = new PriorityQueue<Node>();
         var results = new Dictionary<int, Dictionary<int, Node>>();
         int currentWeight = GetPixelWeight(currenctPoint);
         bool foundGoal = false;
         // Enqueue to make it past the first loop; weight of 0
-        q.Enqueue(new Node(null, currenctPoint, currentWeight), 0);
+        Node start = new Node(null, currenctPoint, currentWeight);
+        q.Enqueue(start, 0);
+        // Settle the start point
+        AddNodeToResults(ref results, start);
 
         while (!q.IsEmpty() && !foundGoal) {
           // Pop the lowest cost node
           Node v = (Node)q.Dequeue();
-          // Mark `v` as visited
-          AddNodeToResults(ref results, v);
           // Iterate over each child
           foreach (Point p in GetNeighbors(v.Current)) {
             // If destination point, stop.
@@ -61,10 +66,14 @@ namespace VisualIntelligentScissors {
               shortestPath = new Node(v, p, weight);
             }
             // If it's not a visited node, or queued for exploration, do so now
-            else if (!InResults(ref results, p) && !q.Contains(p)) {
+            else if (!InResults(ref results, p)) {
               // Calculate new weight and enqueue a new Node
               int weight = v.Total + GetPixelWeight(p);
-              q.Enqueue(new Node(v, p, weight), weight);
+              Node c = new Node(v, p, weight);
+              // Enqueue the new node
+              q.Enqueue(c, weight);
+              // Settle the new node right now
+              AddNodeToResults(ref results, c);
               //g.FillRectangle(pen.Brush, p.X, p.Y, 1, 1);
             }
           }
@@ -102,14 +111,25 @@ namespace VisualIntelligentScissors {
       return false;
     }
 
+    private bool IsEdgePoint(Point p) {
+      return (p.X <= 1 || p.Y <= 1 || p.Y >= Image.Bitmap.Width - 1 || p.Y >= Image.Bitmap.Height - 1);
+    }
+
     public List<Point> GetNeighbors(Point p) {
       List<Point> neighbors = new List<Point>();
 
       // Oriented points: N, S, E, W
-      neighbors.Add(new Point(p.X, p.Y - 1));
-      neighbors.Add(new Point(p.X, p.Y + 1));
-      neighbors.Add(new Point(p.X + 1, p.Y));
-      neighbors.Add(new Point(p.X - 1, p.Y));
+      if (!IsEdgePoint(new Point(p.X, p.Y - 1)))
+        neighbors.Add(new Point(p.X, p.Y - 1));
+
+      if (!IsEdgePoint(new Point(p.X, p.Y + 1)))
+        neighbors.Add(new Point(p.X, p.Y + 1));
+
+      if (!IsEdgePoint(new Point(p.X + 1, p.Y)))
+        neighbors.Add(new Point(p.X + 1, p.Y));
+
+      if (!IsEdgePoint(new Point(p.X - 1, p.Y)))
+        neighbors.Add(new Point(p.X - 1, p.Y));
 
       return neighbors;
     }
@@ -126,9 +146,8 @@ namespace VisualIntelligentScissors {
       this.Current = Current;
       this.Total = Total;
     }
-  
-  }
 
+  }
 
   //
   // CREDIT: http://stackoverflow.com/a/4994931/1457934
@@ -149,15 +168,16 @@ namespace VisualIntelligentScissors {
     public object Dequeue() {
       if (IsEmpty()) {
         throw new Exception("Please check that priorityQueue is not empty before dequeing");
-      } else
-        foreach (Queue q in storage.Values) {
-          // we use a sorted dictionary
-          if (q.Count > 0) {
-            total_size--;
-            return q.Dequeue();
-          }
-        }
-      return null;
+      } else {
+        var kv = storage.First();
+        Queue q = kv.Value;
+        object deq = q.Dequeue();
+
+        if (q.Count == 0)
+          storage.Remove(kv.Key);
+
+        return deq;
+      }
     }
 
     public object Dequeue(int prio) {

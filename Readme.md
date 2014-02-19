@@ -5,4 +5,6 @@ An Intelligent Scissors algorithm that uses Dijkstra’s algorithm to find the o
 
 Example:
 
-![Image](http://desh.es/s/220609.png)
+![Image](http://desh.es/s/172715.png)
+
+Less than half a second, wow!
